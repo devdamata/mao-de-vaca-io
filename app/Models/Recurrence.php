@@ -29,11 +29,11 @@ class Recurrence extends Model
     // Se no futuro tiver relacionamento com incomes ou expenses, pode adicionar por exemplo:
      public function income(): BelongsTo
      {
-         return $this->belongsTo(Income::class);
+         return $this->belongsTo(Income::class, 'income_id');
      }
 
      public function expenses(): BelongsTo
      {
-         return $this->belongsTo(Expense::class);
+         return $this->belongsTo(Expense::class, 'expense_id');
      }
 }

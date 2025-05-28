@@ -42,18 +42,26 @@ class ParcelResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('recurrence_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('recurrence')
+                    ->label('Nome da Receita/Despesa')
+                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        return $state->income?->description ?? $state->expense?->description ?? '-';
+                    }),
                 Tables\Columns\TextColumn::make('due_date')
+                    ->label('Data de Vencimento')
                     ->date()
+                    ->dateTime('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->numeric()
+                    ->label('Valor')
+                    ->money('BRL', true)
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_income')
+                    ->label('É Receita?')
                     ->boolean(),
                 Tables\Columns\IconColumn::make('is_paid')
+                    ->label('Está Paga?')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

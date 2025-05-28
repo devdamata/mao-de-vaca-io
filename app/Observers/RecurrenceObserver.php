@@ -42,7 +42,6 @@ class RecurrenceObserver
                     $current->addYear();
                     break;
                 default:
-                    // Se não houver frequência válida, pare o loop
                     $current = $end->copy()->addDay();
                     break;
             }
