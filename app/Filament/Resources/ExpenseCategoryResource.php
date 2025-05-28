@@ -17,7 +17,9 @@ class ExpenseCategoryResource extends Resource
 {
     protected static ?string $model = ExpenseCategory::class;
 
+    protected static ?string $label = 'Categorias de Despesas';
     protected static ?string $navigationLabel = 'Categorias de Despesa';
+    protected static ?string $navigationGroup = 'Despesas';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -65,9 +67,9 @@ class ExpenseCategoryResource extends Resource
     {
         return [
             'index' => Pages\ListExpenseCategories::route('/'),
-            'create' => Pages\CreateExpenseCategory::route('/create'),
-            'view' => Pages\ViewExpenseCategory::route('/{record}'),
-            'edit' => Pages\EditExpenseCategory::route('/{record}/edit'),
+//            'create' => Pages\CreateExpenseCategory::route('/create'),
+//            'view' => Pages\ViewExpenseCategory::route('/{record}'),
+//            'edit' => Pages\EditExpenseCategory::route('/{record}/edit'),
         ];
     }
 }

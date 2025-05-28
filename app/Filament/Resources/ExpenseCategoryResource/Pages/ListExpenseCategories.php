@@ -9,7 +9,7 @@ use Filament\Resources\Pages\ListRecords;
 class ListExpenseCategories extends ListRecords
 {
     protected static string $resource = ExpenseCategoryResource::class;
-    protected static ?string $title = 'Lista Categorias de Despesas';
+//    protected static ?string $title = 'Lista Categorias de Despesas';
 
     protected function getHeaderActions(): array
     {

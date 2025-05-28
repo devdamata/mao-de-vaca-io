@@ -12,10 +12,15 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Leandrocfe\FilamentPtbrFormFields\Money;
 
 class ParcelResource extends Resource
 {
     protected static ?string $model = Parcel::class;
+
+    protected static ?string $label = 'Pacelas';
+    protected static ?string $navigationLabel = 'Parcelas';
+    protected static ?string $navigationGroup = 'Recorrências e Parcelamentos';
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
@@ -24,14 +29,28 @@ class ParcelResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('recurrence_id')
+                    ->label('Nome da Receita/Despesa')
                     ->required()
-                    ->numeric(),
+                    ->disabled()
+                    ->formatStateUsing(function ($state, $component) {
+                        $record = $component->getRecord();
+
+                        return $record?->recurrence?->income?->description
+                            ?? $record?->recurrence?->expense?->description
+                            ?? '-';
+                    }),
                 Forms\Components\DatePicker::make('due_date')
+                    ->label('Data de Vencimento')
+                    ->disabled()
                     ->required(),
-                Forms\Components\TextInput::make('amount')
-                    ->required()
-                    ->numeric(),
+                Money::make('amount')
+                    ->label('Valor')
+                    ->default('00,00')
+                    ->disabled()
+                    ->required(),
                 Forms\Components\Toggle::make('is_income')
+                    ->label('É Receita?')
+                    ->disabled()
                     ->required(),
                 Forms\Components\Toggle::make('is_paid')
                     ->required(),
@@ -96,8 +115,8 @@ class ParcelResource extends Resource
     {
         return [
             'index' => Pages\ListParcels::route('/'),
-            'create' => Pages\CreateParcel::route('/create'),
-            'edit' => Pages\EditParcel::route('/{record}/edit'),
+//            'create' => Pages\CreateParcel::route('/create'),
+//            'edit' => Pages\EditParcel::route('/{record}/edit'),
         ];
     }
 }
