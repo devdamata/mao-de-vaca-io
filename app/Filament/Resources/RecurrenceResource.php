@@ -44,7 +44,19 @@ class RecurrenceResource extends Resource
     {
         return $table
             ->columns([
-                //
+                Tables\Columns\TextColumn::make('frequency')
+                    ->label('Frequencia')
+                    ->sortable()
+                    ->formatStateUsing(function ($state) {
+                        $state->frequency = match ($state->frequency) {
+                            'daily' => 'Diariamente',
+                            'weekly' => 'Semanalmente',
+                            'monthly' => 'Mensalmente',
+                            'yearly' => 'Anualmente'
+                        };
+
+                        return $state;
+                    })
             ])
             ->filters([
                 //
