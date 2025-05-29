@@ -31,10 +31,24 @@ class WalletResource extends Resource
                     ->placeholder('Ex: Casa, Empresa, Cartão 7890')
                     ->required()
                     ->maxLength(255),
-                Money::make('initial_balance')
-                    ->label('Saldo Inicial')
-                    ->default('00,00')
-                    ->required()
+//                Money::make('initial_balance')
+//                    ->label('Saldo Inicial')
+//                    ->default('00,00')
+//                    ->required()
+                Forms\Components\TextInput::make('initial_balance')
+                    ->label('Valor')
+                    ->prefix('R$')
+                    ->extraAttributes([
+                        'x-data' => '{}',
+                        'x-init' => "new Cleave(\$el, {
+            numeral: true,
+            numeralThousandsGroupStyle: 'thousand',
+            numeralDecimalMark: ',',
+            delimiter: '.',
+            numeralDecimalScale: 2,
+            numeralPositiveOnly: false
+        })"
+                    ])
             ]);
     }
 

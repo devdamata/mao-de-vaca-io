@@ -21,8 +21,12 @@ class ParcelResource extends Resource
     protected static ?string $label = 'Pacelas';
     protected static ?string $navigationLabel = 'Parcelas';
     protected static ?string $navigationGroup = 'Recorrências e Parcelamentos';
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Recorrências e Parcelamentos';
+    }
 
     public static function form(Form $form): Form
     {

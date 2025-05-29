@@ -2,10 +2,12 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Facades\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -54,5 +56,23 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    public function registerNavigationGroups(): void
+    {
+        Filament::navigationGroups([
+
+            NavigationGroup::make()
+                ->label('Despesas')
+                ->sort(1),
+
+            NavigationGroup::make()
+                ->label('Receitas')
+                ->sort(2),
+
+            NavigationGroup::make()
+                ->label('Recorrências e Parcelamentos')
+                ->sort(3),
+        ]);
     }
 }

@@ -23,6 +23,14 @@ class ExpenseResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $label = 'Despesas';
+    protected static ?string $navigationLabel = 'Despesas';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Despesas';
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -80,27 +88,27 @@ class ExpenseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('wallet.name')
+                    ->label('Carteira')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('expense_category_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('recurrence_id')
+                Tables\Columns\TextColumn::make('category.name')
+                    ->label('Categoria')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('description')
+                    ->label('Descrição')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('date')
+                    ->label('Data')
                     ->date()
+                    ->dateTime('d/m/Y')
                     ->sortable(),
                 Tables\Columns\IconColumn::make('is_recurring')
+                    ->label('Recorrencia')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

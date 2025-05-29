@@ -19,9 +19,12 @@ class ExpenseCategoryResource extends Resource
 
     protected static ?string $label = 'Categorias de Despesas';
     protected static ?string $navigationLabel = 'Categorias de Despesa';
-    protected static ?string $navigationGroup = 'Despesas';
-
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Despesas';
+    }
 
     public static function form(Form $form): Form
     {

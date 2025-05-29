@@ -14,9 +14,11 @@ class IncomeCategoryResource extends Resource
 {
     protected static ?string $model = IncomeCategory::class;
     protected static ?string $navigationLabel = 'Categorias de Receitas';
-    protected static ?string $navigationGroup = 'Receitas';
     protected static ?string $navigationIcon = 'heroicon-o-tag';
-    protected static ?int $navigationSort = 2;
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Receitas';
+    }
 
     public static function form(Form $form): Form
     {

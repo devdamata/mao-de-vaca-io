@@ -22,7 +22,11 @@ class IncomeResource extends Resource
     protected static ?string $navigationLabel = 'Receitas';
     protected static ?string $navigationGroup = 'Receitas';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?int $navigationSort = 1;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Receitas';
+    }
 
     public static function form(Form $form): Form
     {

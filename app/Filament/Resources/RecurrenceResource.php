@@ -18,8 +18,13 @@ class RecurrenceResource extends Resource
     protected static ?string $model = Recurrence::class;
     protected static ?string $label = 'Recorrências';
     protected static ?string $navigationLabel = 'Recorrências';
-    protected static ?string $navigationGroup = 'Recorrências e Parcelamentos';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Recorrências e Parcelamentos';
+    }
+
 
     public static function getEloquentQuery(): Builder
     {
