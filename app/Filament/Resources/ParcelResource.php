@@ -65,7 +65,7 @@ class ParcelResource extends Resource
                     ->label('Nome da Receita/Despesa')
                     ->sortable()
                     ->formatStateUsing(function ($state) {
-                        return $state->income?->description ?? $state->expense?->description ?? '-';
+                        return $state->income?->description ?? $state->expenses?->description ?? '-';
                     }),
                 Tables\Columns\TextColumn::make('due_date')
                     ->label('Data de Vencimento')

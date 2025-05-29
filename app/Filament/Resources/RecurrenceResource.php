@@ -9,7 +9,9 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class RecurrenceResource extends Resource
 {
@@ -19,6 +21,11 @@ class RecurrenceResource extends Resource
     protected static ?string $navigationGroup = 'Recorrências e Parcelamentos';
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with(['income', 'expenses']);
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -44,19 +51,33 @@ class RecurrenceResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('frequency')
+                TextColumn::make('descricao_tipo')
+                    ->label('Descrição')
+                    ->badge()
+                    ->color(fn ($record) => $record->income_id ? 'success' : ($record->expense_id ? 'danger' : 'gray')),
+
+                TextColumn::make('frequency')
                     ->label('Frequencia')
                     ->sortable()
                     ->formatStateUsing(function ($state) {
-                        $state->frequency = match ($state->frequency) {
+                        return match ($state) {
                             'daily' => 'Diariamente',
                             'weekly' => 'Semanalmente',
                             'monthly' => 'Mensalmente',
                             'yearly' => 'Anualmente'
                         };
+                    }),
 
-                        return $state;
-                    })
+                Tables\Columns\TextColumn::make('starts_at')
+                    ->label('Inicio')
+                    ->date()
+                    ->dateTime('d/m/Y')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('ends_at')
+                    ->label('Fim')
+                    ->date()
+                    ->dateTime('d/m/Y')
+                    ->sortable(),
             ])
             ->filters([
                 //

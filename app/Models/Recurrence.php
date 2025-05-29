@@ -26,6 +26,29 @@ class Recurrence extends Model
         'last_generated_at' => 'date',
     ];
 
+    public function getDescricaoTipoAttribute()
+    {
+        if ($this->income_id && $this->income) {
+            return 'Receita: ' . ucfirst($this->income->description);
+        }
+
+        if ($this->expense_id && $this->expenses) {
+            return 'Despesa: ' . ucfirst($this->expenses->description);
+        }
+
+        return '-';
+    }
+
+    public function getTranslateEnumFrequency()
+    {
+        return match ($this->status) {
+            'daily' => 'Diariamente',
+            'weekly' => 'Semanalmente',
+            'monthly' => 'Mensalmente',
+            'yearly' => 'Anualmente'
+        };
+    }
+
     // Se no futuro tiver relacionamento com incomes ou expenses, pode adicionar por exemplo:
      public function income(): BelongsTo
      {

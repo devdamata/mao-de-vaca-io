@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Models\Expense;
 use App\Models\Income;
 use App\Models\Recurrence;
 use App\Models\Parcel;
@@ -18,14 +19,17 @@ class RecurrenceObserver
         $end = Carbon::parse($recurrence->ends_at);
         $current = $start->copy();
 
-        $income = Income::where('id', $recurrence->income_id)->first();
+        $returnAmount = Income::where('id', $recurrence->income_id)->first();
+        if ($returnAmount === null) {
+            $returnAmount = Expense::where('id', $recurrence->expense_id)->first();
+        }
 
         while ($current <= $end) {
             Parcel::create([
                 'recurrence_id' => $recurrence->id,
                 'due_date' => $current->copy(),
-                'amount' => $income->amount,
-                'is_income' => (bool)$recurrence->id,
+                'amount' => $returnAmount->amount,
+                'is_income' => $returnAmount->table === 'incomes' ? true : false,
             ]);
 
             switch ($recurrence->frequency) {

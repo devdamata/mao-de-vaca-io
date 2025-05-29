@@ -2,10 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\IncomeResource\Pages;
-use App\Filament\Resources\IncomeResource\RelationManagers;
-use App\Models\Income;
-use Carbon\Carbon;
+use App\Filament\Resources\ExpenseResource\Pages;
+use App\Filament\Resources\ExpenseResource\RelationManagers;
+use App\Models\Expense;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -13,16 +12,16 @@ use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Leandrocfe\FilamentPtbrFormFields\Money;
 
-class IncomeResource extends Resource
+class ExpenseResource extends Resource
 {
-    protected static ?string $model = Income::class;
-    protected static ?string $navigationLabel = 'Receitas';
-    protected static ?string $navigationGroup = 'Receitas';
+    protected static ?string $model = Expense::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -33,25 +32,24 @@ class IncomeResource extends Resource
                     ->required(),
                 Forms\Components\Select::make('wallet_id')
                     ->label('Carteira')
-                    ->placeholder('Selecione uma carteira')
                     ->relationship('wallet', 'name')
                     ->required(),
-                Forms\Components\Select::make('income_category_id')
+                Forms\Components\Select::make('expense_category_id')
                     ->label('Categoria')
                     ->placeholder('Selecione categoria')
                     ->relationship('category', 'name')
                     ->required(),
-                Forms\Components\DatePicker::make('date')
-                    ->label('Data')
-                    ->required(),
+                Forms\Components\TextInput::make('description')
+                    ->label('Descrição')
+                    ->columnSpan('full')
+                    ->required()
+                    ->maxLength(255),
                 Money::make('amount')
                     ->label('Valor')
                     ->default('00,00')
                     ->required(),
-                Forms\Components\TextInput::make('description')
-                    ->label('Descrição')
-                    ->columnSpan('full')
-                    ->maxLength(65535),
+                Forms\Components\DatePicker::make('date')
+                    ->required(),
                 Forms\Components\Checkbox::make('is_recurring')
                     ->label('É recorrente?')
                     ->reactive()
@@ -82,36 +80,41 @@ class IncomeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('description')
-                    ->label('Descrição')
-                    ->limit(50)
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('category.name')
-                    ->label('Categoria')
-                    ->sortable()
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('user.name')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('wallet.name')
-                    ->label('Carteira')
-                    ->sortable()
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('date')
-                    ->label('Data')
-                    ->dateTime('d/m/Y H:i:s')
-                    ->sortable()
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('expense_category_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('recurrence_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('description')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
-                    ->label('Valor')
-                    ->money('BRL', true)
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('date')
+                    ->date()
+                    ->sortable(),
+                Tables\Columns\IconColumn::make('is_recurring')
+                    ->boolean(),
+                Tables\Columns\TextColumn::make('created_at')
+                    ->dateTime()
                     ->sortable()
-                    ->searchable(),
-
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
@@ -131,42 +134,9 @@ class IncomeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListIncomes::route('/'),
-            'create' => Pages\CreateIncome::route('/create'),
-            'view' => Pages\ViewIncome::route('/{record}'),
-            'edit' => Pages\EditIncome::route('/{record}/edit'),
+            'index' => Pages\ListExpenses::route('/'),
+            'create' => Pages\CreateExpense::route('/create'),
+            'edit' => Pages\EditExpense::route('/{record}/edit'),
         ];
-    }
-
-    public static function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['recurrency_data'] = $data['recurrency'] ?? null;
-        unset($data['recurrency']);
-
-        return $data;
-    }
-
-    public static function afterCreate($record, array $data): void
-    {
-        if (!empty($data['is_recurrent']) && isset($data['recurrency_data'])) {
-            $record->recurrency()->create([
-                'frequency' => $data['recurrency_data']['frequency'],
-                'end_date' => $data['recurrency_data']['end_date'],
-            ]);
-        }
-        dd($record);
-        if ($record->id) {
-
-//            $start = Carbon::parse($record->starts_at);
-//            $end = Carbon::parse($record->ends_at);
-//            $current = $start->copy();
-//
-//            while ($current <= $end) {
-//                Parcel::create([
-//                    'income_id' => $income->id,
-//                    'recurrence_id' => $record->id,
-//                ]);
-//            }
-        }
     }
 }
