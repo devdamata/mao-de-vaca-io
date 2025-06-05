@@ -2,7 +2,9 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Parcel;
 use App\Models\Wallet;
+use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -25,10 +27,23 @@ class StatsOverview extends BaseWidget
             ];
         }
 
+        $mesAtual = Carbon::now()->month;
+        $anoAtual = Carbon::now()->year;
+        $incomesOfMonth = Parcel::
+            with('recurrence')
+            ->with('income')
+            ->with('user')
+            ->where('is_income', true)
+            ->whereMonth('due_date', $mesAtual)
+            ->whereYear('due_date', $anoAtual)
+            ->sum('amount');
+//        $incomesOfMonth = Parcel::whereMonth('due_date', $mesAtual)->whereYear('data', $anoAtual)->sum('valor');
+
+
         return [
             Stat::make('Carteira', $return['name']),
             Stat::make('Saldo', $return['saldo']),
-//            Stat::make('Average time on page', '3:12'),
+            Stat::make('Receitas do Mês', 'R$ ' . number_format($incomesOfMonth, 2, ',', '.')),
         ];
     }
 }
