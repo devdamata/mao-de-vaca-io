@@ -9,6 +9,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -83,10 +84,14 @@ class ParcelResource extends Resource
                 Tables\Columns\IconColumn::make('is_income')
                     ->label('É Receita?')
                     ->boolean(),
-                Tables\Columns\IconColumn::make('is_paid')
-                    ->label('Está Paga?')
-                    ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
+                ToggleColumn::make('is_paid')
+                    ->label('Pago')
+                    ->onIcon('heroicon-o-check-circle')
+                    ->offIcon('heroicon-o-x-circle')
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->inline(false),
+        Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

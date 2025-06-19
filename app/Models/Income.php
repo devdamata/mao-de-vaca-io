@@ -39,7 +39,7 @@ class Income extends Model
 
     public function recurrence(): HasOne
     {
-        return $this->hasOne(Recurrence::class);
+        return $this->hasOne(Recurrence::class, 'income_id');
     }
 
 

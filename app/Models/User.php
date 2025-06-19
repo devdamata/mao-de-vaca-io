@@ -45,4 +45,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function parcel()
+    {
+        return $this->hasMany(Parcel::class);
+    }
 }

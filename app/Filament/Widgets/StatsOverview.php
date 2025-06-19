@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Balance;
 use App\Models\Parcel;
 use App\Models\Wallet;
 use Carbon\Carbon;
@@ -12,20 +13,23 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class StatsOverview extends BaseWidget
 {
     protected static ?int $sort = 1;
+    protected static ?string $pollingInterval = null;
+    protected static bool $isLazy = false;
     protected function getStats(): array
     {
         $user = Filament::auth()->user()->id;
 
         $wallets = Wallet::with('user')
             ->where('user_id', $user)
-            ->get();
-        $return = [];
-        foreach ($wallets as $wallet) {
-            $return = [
-                'name' => $wallet->name,
-                'saldo' => 'R$ ' . number_format($wallet->initial_balance, 2, ',', '.')
-            ];
-        }
+            ->first();
+
+        $balance = Balance::where('wallet_id', $wallets->id)
+            ->first();
+
+        $return = [
+            'name' => $wallets->name,
+            'saldo' => 'R$ ' . number_format($balance->balance, 2, ',', '.')
+        ];
 
         $mesAtual = Carbon::now()->month;
         $anoAtual = Carbon::now()->year;
@@ -37,8 +41,6 @@ class StatsOverview extends BaseWidget
             ->whereMonth('due_date', $mesAtual)
             ->whereYear('due_date', $anoAtual)
             ->sum('amount');
-//        $incomesOfMonth = Parcel::whereMonth('due_date', $mesAtual)->whereYear('data', $anoAtual)->sum('valor');
-
 
         return [
             Stat::make('Carteira', $return['name']),

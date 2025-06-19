@@ -38,6 +38,7 @@ class RecurrenceResource extends Resource
                 Forms\Components\Select::make('frequency')
                     ->label('Frequência')
                     ->options([
+                        'once' => 'Uma vez',
                         'daily' => 'Diariamente',
                         'weekly' => 'Semanalmente',
                         'monthly' => 'Mensalmente',
@@ -66,6 +67,7 @@ class RecurrenceResource extends Resource
                     ->sortable()
                     ->formatStateUsing(function ($state) {
                         return match ($state) {
+                            'once' => 'Uma vez',
                             'daily' => 'Diariamente',
                             'weekly' => 'Semanalmente',
                             'monthly' => 'Mensalmente',

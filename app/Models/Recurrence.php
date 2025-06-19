@@ -42,21 +42,26 @@ class Recurrence extends Model
     public function getTranslateEnumFrequency()
     {
         return match ($this->status) {
-            'daily' => 'Diariamente',
-            'weekly' => 'Semanalmente',
-            'monthly' => 'Mensalmente',
-            'yearly' => 'Anualmente'
+            'once'      => 'Uma vez',
+            'daily'     => 'Diariamente',
+            'weekly'    => 'Semanalmente',
+            'monthly'   => 'Mensalmente',
+            'yearly'    => 'Anualmente'
         };
     }
 
-    // Se no futuro tiver relacionamento com incomes ou expenses, pode adicionar por exemplo:
-     public function income(): BelongsTo
-     {
-         return $this->belongsTo(Income::class, 'income_id');
-     }
+    public function parcel(): HasMany
+    {
+        return $this->hasMany(Parcel::class, 'recurrence_id');
+    }
 
-     public function expenses(): BelongsTo
-     {
-         return $this->belongsTo(Expense::class, 'expense_id');
-     }
+    public function income(): BelongsTo
+    {
+        return $this->belongsTo(Income::class, 'income_id');
+    }
+
+    public function expenses(): BelongsTo
+    {
+        return $this->belongsTo(Expense::class, 'expense_id');
+    }
 }

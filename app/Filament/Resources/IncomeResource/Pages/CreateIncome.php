@@ -14,11 +14,9 @@ class CreateIncome extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-
         if ($data['is_recurring']) {
             // Salva a parte de recorrência em um campo separado para processar depois
             $this->recurrencyData = [
-                //'income_id' => $data['id'], // ID do Income
                 'frequency' => $data['frequency'],
                 'starts_at' => $data['starts_at'],
                 'ends_at' => $data['ends_at'],
@@ -26,6 +24,12 @@ class CreateIncome extends CreateRecord
 
             // Remove os dados de recorrência do array principal
             unset($data['frequency'], $data['starts_at'], $data['ends_at']);
+        } else {
+            $this->recurrencyData = [
+                'frequency' => 'once',
+                'starts_at' => $data['date'],
+                'ends_at' => $data['date'],
+            ];
         }
 
         return $data;
@@ -33,9 +37,6 @@ class CreateIncome extends CreateRecord
 
     protected function afterCreate(): void
     {
-        if (!empty($this->recurrencyData)) {
-            // Salva os dados de recorrência associados ao Income recém-criado
-            $this->record->recurrence()->create($this->recurrencyData);
-        }
+        $this->record->recurrence()->create($this->recurrencyData);
     }
 }
