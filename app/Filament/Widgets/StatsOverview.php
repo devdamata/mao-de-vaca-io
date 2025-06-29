@@ -23,12 +23,14 @@ class StatsOverview extends BaseWidget
             ->where('user_id', $user)
             ->first();
 
-        $balance = Balance::where('wallet_id', $wallets->id)
+        if ($wallets != null) {
+            $balance = Balance::where('wallet_id', $wallets->id)
             ->first();
+        }
 
         $return = [
-            'name' => $wallets->name,
-            'saldo' => 'R$ ' . number_format($balance->balance, 2, ',', '.')
+            'name' => $wallets->name??'Cadastre uma carteira',
+            'saldo' => 'R$ ' . number_format($balance->balance??0, 2, ',', '.')
         ];
 
         $mesAtual = Carbon::now()->month;
