@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class IncomesChart extends ChartWidget
 {
-    protected static ?string $heading = 'Receitas do Ano';
+    protected ?string $heading = 'Receitas do Ano';
 
     protected static ?int $sort = 2;
 

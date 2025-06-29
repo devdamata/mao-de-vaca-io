@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\WalletResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Resources\WalletResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -14,7 +15,7 @@ class ViewWallet extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }

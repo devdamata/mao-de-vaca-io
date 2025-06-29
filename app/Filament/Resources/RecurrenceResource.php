@@ -2,11 +2,21 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\RecurrenceResource\Pages\ListRecurrences;
+use App\Filament\Resources\RecurrenceResource\Pages\CreateRecurrence;
+use App\Filament\Resources\RecurrenceResource\Pages\ViewRecurrence;
+use App\Filament\Resources\RecurrenceResource\Pages\EditRecurrence;
 use App\Filament\Resources\RecurrenceResource\Pages;
 use App\Filament\Resources\RecurrenceResource\RelationManagers;
 use App\Models\Recurrence;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -18,7 +28,7 @@ class RecurrenceResource extends Resource
     protected static ?string $model = Recurrence::class;
     protected static ?string $label = 'Recorrências';
     protected static ?string $navigationLabel = 'Recorrências';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): ?string
     {
@@ -31,11 +41,11 @@ class RecurrenceResource extends Resource
         return parent::getEloquentQuery()
             ->with(['income', 'expenses']);
     }
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Select::make('frequency')
+        return $schema
+            ->components([
+                Select::make('frequency')
                     ->label('Frequência')
                     ->options([
                         'once' => 'Uma vez',
@@ -45,10 +55,10 @@ class RecurrenceResource extends Resource
                         'yearly' => 'Anualmente',
                     ])
                     ->required(),
-                Forms\Components\DatePicker::make('starts_at')
+                DatePicker::make('starts_at')
                     ->label('Data de Início')
                     ->required(),
-                Forms\Components\DatePicker::make('ends_at')
+                DatePicker::make('ends_at')
                     ->label('Data de Fim'),
             ]);
     }
@@ -75,12 +85,12 @@ class RecurrenceResource extends Resource
                         };
                     }),
 
-                Tables\Columns\TextColumn::make('starts_at')
+                TextColumn::make('starts_at')
                     ->label('Inicio')
                     ->date()
                     ->dateTime('d/m/Y')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('ends_at')
+                TextColumn::make('ends_at')
                     ->label('Fim')
                     ->date()
                     ->dateTime('d/m/Y')
@@ -89,13 +99,13 @@ class RecurrenceResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -110,10 +120,10 @@ class RecurrenceResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListRecurrences::route('/'),
-            'create' => Pages\CreateRecurrence::route('/create'),
-            'view' => Pages\ViewRecurrence::route('/{record}'),
-            'edit' => Pages\EditRecurrence::route('/{record}/edit'),
+            'index' => ListRecurrences::route('/'),
+            'create' => CreateRecurrence::route('/create'),
+            'view' => ViewRecurrence::route('/{record}'),
+            'edit' => EditRecurrence::route('/{record}/edit'),
         ];
     }
 }

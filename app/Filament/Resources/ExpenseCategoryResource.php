@@ -2,11 +2,18 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ExpenseCategoryResource\Pages\ListExpenseCategories;
 use App\Filament\Resources\ExpenseCategoryResource\Pages;
 use App\Filament\Resources\ExpenseCategoryResource\RelationManagers;
 use App\Models\ExpenseCategory;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -19,18 +26,18 @@ class ExpenseCategoryResource extends Resource
 
     protected static ?string $label = 'Categorias de Despesas';
     protected static ?string $navigationLabel = 'Categorias de Despesa';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): ?string
     {
         return 'Despesas';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255)
                     ->label('Nome da categoria')
@@ -41,20 +48,20 @@ class ExpenseCategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id'),
-                Tables\Columns\TextColumn::make('name')->label('Categoria'),
-                Tables\Columns\TextColumn::make('created_at')->label('Criado em')->dateTime('d/m/Y H:i:s'),
+                TextColumn::make('id'),
+                TextColumn::make('name')->label('Categoria'),
+                TextColumn::make('created_at')->label('Criado em')->dateTime('d/m/Y H:i:s'),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -69,7 +76,7 @@ class ExpenseCategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListExpenseCategories::route('/'),
+            'index' => ListExpenseCategories::route('/'),
 //            'create' => Pages\CreateExpenseCategory::route('/create'),
 //            'view' => Pages\ViewExpenseCategory::route('/{record}'),
 //            'edit' => Pages\EditExpenseCategory::route('/{record}/edit'),

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\IncomeResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Resources\IncomeResource;
 use App\Models\Income;
 use Filament\Actions;
@@ -19,7 +20,7 @@ class ViewIncome extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
     protected function mutateFormDataBeforeFill(array $data): array

@@ -2,10 +2,20 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\IncomeCategoryResource\Pages\ListIncomeCategories;
+use App\Filament\Resources\IncomeCategoryResource\Pages\CreateIncomeCategory;
+use App\Filament\Resources\IncomeCategoryResource\Pages\ViewIncomeCategory;
+use App\Filament\Resources\IncomeCategoryResource\Pages\EditIncomeCategory;
 use App\Filament\Resources\IncomeCategoryResource\Pages;
 use App\Models\IncomeCategory;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -14,17 +24,17 @@ class IncomeCategoryResource extends Resource
 {
     protected static ?string $model = IncomeCategory::class;
     protected static ?string $navigationLabel = 'Categorias de Receitas';
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-tag';
     public static function getNavigationGroup(): ?string
     {
         return 'Receitas';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->required()
                     ->maxLength(255)
                     ->label('Nome da categoria')
@@ -35,20 +45,20 @@ class IncomeCategoryResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('id'),
-                Tables\Columns\TextColumn::make('name')->label('Categoria'),
-                Tables\Columns\TextColumn::make('created_at')->label('Criado em')->dateTime('d/m/Y H:i:s'),
+                TextColumn::make('id'),
+                TextColumn::make('name')->label('Categoria'),
+                TextColumn::make('created_at')->label('Criado em')->dateTime('d/m/Y H:i:s'),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -63,10 +73,10 @@ class IncomeCategoryResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListIncomeCategories::route('/'),
-            'create' => Pages\CreateIncomeCategory::route('/create'),
-            'view' => Pages\ViewIncomeCategory::route('/{record}'),
-            'edit' => Pages\EditIncomeCategory::route('/{record}/edit'),
+            'index' => ListIncomeCategories::route('/'),
+            'create' => CreateIncomeCategory::route('/create'),
+            'view' => ViewIncomeCategory::route('/{record}'),
+            'edit' => EditIncomeCategory::route('/{record}/edit'),
         ];
     }
 
