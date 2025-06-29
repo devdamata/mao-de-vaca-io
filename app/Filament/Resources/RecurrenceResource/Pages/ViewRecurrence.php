@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\RecurrenceResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Resources\RecurrenceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -13,7 +14,7 @@ class ViewRecurrence extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }

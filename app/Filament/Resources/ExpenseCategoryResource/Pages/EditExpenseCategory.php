@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\ExpenseCategoryResource\Pages;
 
+use Filament\Actions\ViewAction;
+use Filament\Actions\DeleteAction;
 use App\Filament\Resources\ExpenseCategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
@@ -14,8 +16,8 @@ class EditExpenseCategory extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

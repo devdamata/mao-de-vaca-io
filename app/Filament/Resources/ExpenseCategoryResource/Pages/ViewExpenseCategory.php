@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\ExpenseCategoryResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Resources\ExpenseCategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -14,7 +15,7 @@ class ViewExpenseCategory extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\IncomeCategoryResource\Pages;
 
+use Filament\Actions\EditAction;
 use App\Filament\Resources\IncomeCategoryResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
@@ -15,7 +16,7 @@ class ViewIncomeCategory extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }

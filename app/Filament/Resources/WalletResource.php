@@ -2,11 +2,22 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\WalletResource\Pages\ListWallets;
+use App\Filament\Resources\WalletResource\Pages\CreateWallet;
+use App\Filament\Resources\WalletResource\Pages\ViewWallet;
+use App\Filament\Resources\WalletResource\Pages\EditWallet;
 use App\Filament\Resources\WalletResource\Pages;
 use App\Models\Wallet;
 use Filament\Facades\Filament;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -16,22 +27,22 @@ class WalletResource extends Resource
 {
     protected static ?string $model = Wallet::class;
     protected static ?string $navigationLabel = 'Carteiras';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $breadcrumb = 'Carteira';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Hidden::make('user_id')
+        return $schema
+            ->components([
+                Hidden::make('user_id')
                     ->default(fn () => Filament::auth()->user()->id)
                     ->required(),
-                Forms\Components\TextInput::make('name')
+                TextInput::make('name')
                     ->label('Nome da Carteira')
                     ->placeholder('Ex: Casa, Empresa, Cartão 7890')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('initial_balance')
+                TextInput::make('initial_balance')
                     ->label('Valor')
                     ->prefix('R$')
                     ->extraAttributes([
@@ -52,21 +63,21 @@ class WalletResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')->label('Usuário'),
-                Tables\Columns\TextColumn::make('name')->label('Nome'),
-                Tables\Columns\TextColumn::make('initial_balance')->label('Saldo Inicial')->money('BRL'),
-                Tables\Columns\TextColumn::make('created_at')->label('Criado em')->dateTime('d/m/Y H:i:s'),
+                TextColumn::make('user.name')->label('Usuário'),
+                TextColumn::make('name')->label('Nome'),
+                TextColumn::make('initial_balance')->label('Saldo Inicial')->money('BRL'),
+                TextColumn::make('created_at')->label('Criado em')->dateTime('d/m/Y H:i:s'),
             ])
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -81,10 +92,10 @@ class WalletResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListWallets::route('/'),
-            'create' => Pages\CreateWallet::route('/create'),
-            'view' => Pages\ViewWallet::route('/{record}'),
-            'edit' => Pages\EditWallet::route('/{record}/edit'),
+            'index' => ListWallets::route('/'),
+            'create' => CreateWallet::route('/create'),
+            'view' => ViewWallet::route('/{record}'),
+            'edit' => EditWallet::route('/{record}/edit'),
         ];
     }
 }

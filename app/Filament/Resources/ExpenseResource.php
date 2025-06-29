@@ -2,13 +2,27 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Checkbox;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ExpenseResource\Pages\ListExpenses;
+use App\Filament\Resources\ExpenseResource\Pages\CreateExpense;
+use App\Filament\Resources\ExpenseResource\Pages\EditExpense;
 use App\Filament\Resources\ExpenseResource\Pages;
 use App\Filament\Resources\ExpenseResource\RelationManagers;
 use App\Models\Expense;
 use Filament\Facades\Filament;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -21,7 +35,7 @@ class ExpenseResource extends Resource
 {
     protected static ?string $model = Expense::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $label = 'Despesas';
     protected static ?string $navigationLabel = 'Despesas';
@@ -31,23 +45,23 @@ class ExpenseResource extends Resource
         return 'Despesas';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Hidden::make('user_id')
+        return $schema
+            ->components([
+                Hidden::make('user_id')
                     ->default(fn () => Filament::auth()->user()->id)
                     ->required(),
-                Forms\Components\Select::make('wallet_id')
+                Select::make('wallet_id')
                     ->label('Carteira')
                     ->relationship('wallet', 'name')
                     ->required(),
-                Forms\Components\Select::make('expense_category_id')
+                Select::make('expense_category_id')
                     ->label('Categoria')
                     ->placeholder('Selecione categoria')
                     ->relationship('category', 'name')
                     ->required(),
-                Forms\Components\TextInput::make('description')
+                TextInput::make('description')
                     ->label('Descrição')
                     ->columnSpan('full')
                     ->required()
@@ -56,15 +70,15 @@ class ExpenseResource extends Resource
                     ->label('Valor')
                     ->default('00,00')
                     ->required(),
-                Forms\Components\DatePicker::make('date')
+                DatePicker::make('date')
                     ->required(),
-                Forms\Components\Checkbox::make('is_recurring')
+                Checkbox::make('is_recurring')
                     ->label('É recorrente?')
                     ->reactive()
                     ->default(fn (?Model $record ) => $record?->recurrence !== null),
-                Forms\Components\Fieldset::make('Recorrência')
+                Fieldset::make('Recorrência')
                     ->schema([
-                        Forms\Components\Select::make('frequency')
+                        Select::make('frequency')
                             ->label('Frequência')
                             ->options([
                                 'daily' => 'Diariamente',
@@ -73,10 +87,10 @@ class ExpenseResource extends Resource
                                 'yearly' => 'Anualmente',
                             ])
                             ->requiredIf('is_recurring', true),
-                        Forms\Components\DatePicker::make('starts_at')
+                        DatePicker::make('starts_at')
                             ->label('Data de Início')
                             ->requiredIf('is_recurring', true),
-                        Forms\Components\DatePicker::make('ends_at')
+                        DatePicker::make('ends_at')
                             ->label('Data de Fim'),
                     ])
                     ->columns(2)
@@ -88,33 +102,33 @@ class ExpenseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('wallet.name')
+                TextColumn::make('wallet.name')
                     ->label('Carteira')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category.name')
+                TextColumn::make('category.name')
                     ->label('Categoria')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label('Descrição')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->label('Data')
                     ->date()
                     ->dateTime('d/m/Y')
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_recurring')
+                IconColumn::make('is_recurring')
                     ->label('Recorrencia')
                     ->boolean(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -122,12 +136,12 @@ class ExpenseResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -142,9 +156,9 @@ class ExpenseResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListExpenses::route('/'),
-            'create' => Pages\CreateExpense::route('/create'),
-            'edit' => Pages\EditExpense::route('/{record}/edit'),
+            'index' => ListExpenses::route('/'),
+            'create' => CreateExpense::route('/create'),
+            'edit' => EditExpense::route('/{record}/edit'),
         ];
     }
 }

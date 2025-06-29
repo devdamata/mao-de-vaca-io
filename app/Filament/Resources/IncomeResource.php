@@ -2,14 +2,29 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Checkbox;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\IncomeResource\Pages\ListIncomes;
+use App\Filament\Resources\IncomeResource\Pages\CreateIncome;
+use App\Filament\Resources\IncomeResource\Pages\ViewIncome;
+use App\Filament\Resources\IncomeResource\Pages\EditIncome;
 use App\Filament\Resources\IncomeResource\Pages;
 use App\Filament\Resources\IncomeResource\RelationManagers;
 use App\Models\Income;
 use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -20,49 +35,49 @@ class IncomeResource extends Resource
 {
     protected static ?string $model = Income::class;
     protected static ?string $navigationLabel = 'Receitas';
-    protected static ?string $navigationGroup = 'Receitas';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \UnitEnum | null $navigationGroup = 'Receitas';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): ?string
     {
         return 'Receitas';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\Hidden::make('user_id')
+        return $schema
+            ->components([
+                Hidden::make('user_id')
                     ->default(fn () => Filament::auth()->user()->id)
                     ->required(),
-                Forms\Components\Select::make('wallet_id')
+                Select::make('wallet_id')
                     ->label('Carteira')
                     ->placeholder('Selecione uma carteira')
                     ->relationship('wallet', 'name')
                     ->required(),
-                Forms\Components\Select::make('income_category_id')
+                Select::make('income_category_id')
                     ->label('Categoria')
                     ->placeholder('Selecione categoria')
                     ->relationship('category', 'name')
                     ->required(),
-                Forms\Components\DatePicker::make('date')
+                DatePicker::make('date')
                     ->label('Data')
                     ->required(),
                 Money::make('amount')
                     ->label('Valor')
                     ->default('00,00')
                     ->required(),
-                Forms\Components\TextInput::make('description')
+                TextInput::make('description')
                     ->label('Descrição')
                     ->columnSpan('full')
                     ->maxLength(65535),
-                Forms\Components\Checkbox::make('is_recurring')
+                Checkbox::make('is_recurring')
                     ->label('É recorrente?')
                     ->reactive()
                     ->default(fn (?Model $record ) => $record?->recurrence !== null),
-                Forms\Components\Fieldset::make('Recorrência')
+                Fieldset::make('Recorrência')
                     ->schema([
-                        Forms\Components\Select::make('frequency')
+                        Select::make('frequency')
                             ->label('Frequência')
                             ->options([
                                 'daily' => 'Diariamente',
@@ -71,10 +86,10 @@ class IncomeResource extends Resource
                                 'yearly' => 'Anualmente',
                             ])
                             ->requiredIf('is_recurring', true),
-                        Forms\Components\DatePicker::make('starts_at')
+                        DatePicker::make('starts_at')
                             ->label('Data de Início')
                             ->requiredIf('is_recurring', true),
-                        Forms\Components\DatePicker::make('ends_at')
+                        DatePicker::make('ends_at')
                             ->label('Data de Fim'),
                     ])
                     ->columns(2)
@@ -86,25 +101,25 @@ class IncomeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('description')
+                TextColumn::make('description')
                     ->label('Descrição')
                     ->limit(50)
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('category.name')
+                TextColumn::make('category.name')
                     ->label('Categoria')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('wallet.name')
+                TextColumn::make('wallet.name')
                     ->label('Carteira')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('date')
+                TextColumn::make('date')
                     ->label('Data')
                     ->dateTime('d/m/Y H:i:s')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label('Valor')
                     ->money('BRL', true)
                     ->sortable()
@@ -114,13 +129,13 @@ class IncomeResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -135,10 +150,10 @@ class IncomeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListIncomes::route('/'),
-            'create' => Pages\CreateIncome::route('/create'),
-            'view' => Pages\ViewIncome::route('/{record}'),
-            'edit' => Pages\EditIncome::route('/{record}/edit'),
+            'index' => ListIncomes::route('/'),
+            'create' => CreateIncome::route('/create'),
+            'view' => ViewIncome::route('/{record}'),
+            'edit' => EditIncome::route('/{record}/edit'),
         ];
     }
 

@@ -2,11 +2,20 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\ParcelResource\Pages\ListParcels;
 use App\Filament\Resources\ParcelResource\Pages;
 use App\Filament\Resources\ParcelResource\RelationManagers;
 use App\Models\Parcel;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\ToggleColumn;
@@ -21,19 +30,19 @@ class ParcelResource extends Resource
 
     protected static ?string $label = 'Pacelas';
     protected static ?string $navigationLabel = 'Parcelas';
-    protected static ?string $navigationGroup = 'Recorrências e Parcelamentos';
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \UnitEnum | null $navigationGroup = 'Recorrências e Parcelamentos';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): ?string
     {
         return 'Recorrências e Parcelamentos';
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('recurrence_id')
+        return $schema
+            ->components([
+                TextInput::make('recurrence_id')
                     ->label('Nome da Receita/Despesa')
                     ->required()
                     ->disabled()
@@ -44,7 +53,7 @@ class ParcelResource extends Resource
                             ?? $record?->recurrence?->expense?->description
                             ?? '-';
                     }),
-                Forms\Components\DatePicker::make('due_date')
+                DatePicker::make('due_date')
                     ->label('Data de Vencimento')
                     ->disabled()
                     ->required(),
@@ -53,11 +62,11 @@ class ParcelResource extends Resource
                     ->default('00,00')
                     ->disabled()
                     ->required(),
-                Forms\Components\Toggle::make('is_income')
+                Toggle::make('is_income')
                     ->label('É Receita?')
                     ->disabled()
                     ->required(),
-                Forms\Components\Toggle::make('is_paid')
+                Toggle::make('is_paid')
                     ->required(),
             ]);
     }
@@ -66,22 +75,22 @@ class ParcelResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('recurrence')
+                TextColumn::make('recurrence')
                     ->label('Nome da Receita/Despesa')
                     ->sortable()
                     ->formatStateUsing(function ($state) {
                         return $state->income?->description ?? $state->expenses?->description ?? '-';
                     }),
-                Tables\Columns\TextColumn::make('due_date')
+                TextColumn::make('due_date')
                     ->label('Data de Vencimento')
                     ->date()
                     ->dateTime('d/m/Y')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('amount')
+                TextColumn::make('amount')
                     ->label('Valor')
                     ->money('BRL', true)
                     ->sortable(),
-                Tables\Columns\IconColumn::make('is_income')
+                IconColumn::make('is_income')
                     ->label('É Receita?')
                     ->boolean(),
                 ToggleColumn::make('is_paid')
@@ -91,11 +100,11 @@ class ParcelResource extends Resource
                     ->onColor('success')
                     ->offColor('danger')
                     ->inline(false),
-        Tables\Columns\TextColumn::make('created_at')
+        TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -103,12 +112,12 @@ class ParcelResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -123,7 +132,7 @@ class ParcelResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListParcels::route('/'),
+            'index' => ListParcels::route('/'),
 //            'create' => Pages\CreateParcel::route('/create'),
 //            'edit' => Pages\EditParcel::route('/{record}/edit'),
         ];
