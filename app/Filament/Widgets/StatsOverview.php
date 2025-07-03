@@ -6,6 +6,7 @@ use App\Models\Balance;
 use App\Models\Parcel;
 use App\Models\Wallet;
 use Carbon\Carbon;
+use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -29,21 +30,25 @@ class StatsOverview extends BaseWidget
         }
 
         $return = [
-            'name' => $wallets->name??'Cadastre uma carteira',
+            'name' => $wallets->name??Action::make('Cadastre uma carteira')
+                    ->url(route('filament.admin.resources.wallets.create'))
+                    ->color('primary')
+                    ->icon('heroicon-o-plus'),
             'saldo' => 'R$ ' . number_format($balance->balance??0, 2, ',', '.')
         ];
 
         $mesAtual = Carbon::now()->month;
         $anoAtual = Carbon::now()->year;
-        $incomesOfMonth = Parcel::
-            with('recurrence')
-            ->with('income')
-            ->with('user')
-            ->where('is_income', true)
-            ->whereMonth('due_date', $mesAtual)
-            ->whereYear('due_date', $anoAtual)
-            ->sum('amount');
 
+        $incomesOfMonth = Parcel::join('recurrences', 'recurrences.id', '=', 'parcels.recurrence_id')
+            ->join('incomes', 'incomes.id', '=', 'recurrences.income_id')
+            ->join('users', 'users.id', '=', 'incomes.user_id')
+            ->where('parcels.is_income', true)
+            ->where('users.id', $user)
+            ->whereMonth('parcels.due_date', $mesAtual)
+            ->whereYear('parcels.due_date', $anoAtual)
+            ->sum('parcels.amount');
+        
         return [
             Stat::make('Carteira', $return['name']),
             Stat::make('Saldo', $return['saldo']),

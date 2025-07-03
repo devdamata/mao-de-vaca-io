@@ -62,6 +62,6 @@ class Recurrence extends Model
 
     public function expenses(): BelongsTo
     {
-        return $this->belongsTo(Expense::class, 'expense_id');
+        return $this->belongsTo(Expense::class, 'id');
     }
 }

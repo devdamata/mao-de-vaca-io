@@ -28,12 +28,12 @@ class Parcel extends Model
 
     public function income()
     {
-        return $this->belongsTo(Income::class);
+        return $this->belongsTo(Income::class, 'income_id');
     }
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     protected static function booted(): void
