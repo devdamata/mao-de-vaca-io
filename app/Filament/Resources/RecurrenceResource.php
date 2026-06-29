@@ -16,6 +16,7 @@ use App\Filament\Resources\RecurrenceResource\Pages\EditRecurrence;
 use App\Filament\Resources\RecurrenceResource\Pages;
 use App\Filament\Resources\RecurrenceResource\RelationManagers;
 use App\Models\Recurrence;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -38,8 +39,14 @@ class RecurrenceResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
+        $userId = Filament::auth()->id();
+
         return parent::getEloquentQuery()
-            ->with(['income', 'expenses']);
+            ->with(['income', 'expenses'])
+            ->where(function (Builder $query) use ($userId) {
+                $query->whereHas('income', fn (Builder $q) => $q->where('user_id', $userId))
+                    ->orWhereHas('expenses', fn (Builder $q) => $q->where('user_id', $userId));
+            });
     }
     public static function form(Schema $schema): Schema
     {
@@ -81,7 +88,8 @@ class RecurrenceResource extends Resource
                             'daily' => 'Diariamente',
                             'weekly' => 'Semanalmente',
                             'monthly' => 'Mensalmente',
-                            'yearly' => 'Anualmente'
+                            'yearly' => 'Anualmente',
+                            default => $state,
                         };
                     }),
 

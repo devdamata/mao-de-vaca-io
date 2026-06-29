@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\ViewAction;
@@ -13,11 +14,13 @@ use App\Filament\Resources\ExpenseCategoryResource\Pages\ListExpenseCategories;
 use App\Filament\Resources\ExpenseCategoryResource\Pages;
 use App\Filament\Resources\ExpenseCategoryResource\RelationManagers;
 use App\Models\ExpenseCategory;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ExpenseCategoryResource extends Resource
@@ -33,10 +36,33 @@ class ExpenseCategoryResource extends Resource
         return 'Despesas';
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        $userId = Filament::auth()->id();
+
+        // Categorias globais (user_id nulo) + categorias do próprio usuário
+        return parent::getEloquentQuery()
+            ->where(fn (Builder $query) => $query
+                ->whereNull('user_id')
+                ->orWhere('user_id', $userId));
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return $record->user_id === Filament::auth()->id();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return $record->user_id === Filament::auth()->id();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
+                Hidden::make('user_id')
+                    ->default(fn () => Filament::auth()->id()),
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)

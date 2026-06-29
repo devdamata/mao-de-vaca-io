@@ -22,12 +22,12 @@ use App\Filament\Resources\IncomeResource\Pages\EditIncome;
 use App\Filament\Resources\IncomeResource\Pages;
 use App\Filament\Resources\IncomeResource\RelationManagers;
 use App\Models\Income;
-use Carbon\Carbon;
 use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Leandrocfe\FilamentPtbrFormFields\Money;
 
@@ -41,6 +41,12 @@ class IncomeResource extends Resource
     public static function getNavigationGroup(): ?string
     {
         return 'Receitas';
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('user_id', Filament::auth()->id());
     }
 
     public static function form(Schema $schema): Schema
@@ -58,7 +64,10 @@ class IncomeResource extends Resource
                 Select::make('income_category_id')
                     ->label('Categoria')
                     ->placeholder('Selecione categoria')
-                    ->relationship('category', 'name')
+                    ->relationship('category', 'name', fn (Builder $query) => $query
+                        ->where(fn (Builder $q) => $q
+                            ->whereNull('user_id')
+                            ->orWhere('user_id', Filament::auth()->id())))
                     ->required(),
                 DatePicker::make('date')
                     ->label('Data')
@@ -155,37 +164,5 @@ class IncomeResource extends Resource
             'view' => ViewIncome::route('/{record}'),
             'edit' => EditIncome::route('/{record}/edit'),
         ];
-    }
-
-    public static function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['recurrency_data'] = $data['recurrency'] ?? null;
-        unset($data['recurrency']);
-
-        return $data;
-    }
-
-    public static function afterCreate($record, array $data): void
-    {
-        if (!empty($data['is_recurrent']) && isset($data['recurrency_data'])) {
-            $record->recurrency()->create([
-                'frequency' => $data['recurrency_data']['frequency'],
-                'end_date' => $data['recurrency_data']['end_date'],
-            ]);
-        }
-        dd($record);
-        if ($record->id) {
-
-//            $start = Carbon::parse($record->starts_at);
-//            $end = Carbon::parse($record->ends_at);
-//            $current = $start->copy();
-//
-//            while ($current <= $end) {
-//                Parcel::create([
-//                    'income_id' => $income->id,
-//                    'recurrence_id' => $record->id,
-//                ]);
-//            }
-        }
     }
 }

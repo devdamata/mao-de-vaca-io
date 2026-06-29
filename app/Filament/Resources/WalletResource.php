@@ -21,6 +21,7 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Leandrocfe\FilamentPtbrFormFields\Money;
 
 class WalletResource extends Resource
@@ -29,6 +30,12 @@ class WalletResource extends Resource
     protected static ?string $navigationLabel = 'Carteiras';
     protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $breadcrumb = 'Carteira';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('user_id', Filament::auth()->id());
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -45,6 +52,20 @@ class WalletResource extends Resource
                 TextInput::make('initial_balance')
                     ->label('Valor')
                     ->prefix('R$')
+                    ->default('0,00')
+                    ->formatStateUsing(fn ($state) => $state === null || $state === ''
+                        ? null
+                        : number_format((float) $state, 2, ',', '.'))
+                    ->dehydrateStateUsing(function ($state) {
+                        if ($state === null || $state === '') {
+                            return 0;
+                        }
+
+                        $negative = str_starts_with(trim((string) $state), '-');
+                        $clean = str_replace(',', '.', preg_replace('/[^\d,]/', '', (string) $state));
+
+                        return $negative ? -1 * (float) $clean : (float) $clean;
+                    })
                     ->extraAttributes([
                         'x-data' => '{}',
                         'x-init' => "new Cleave(\$el, {

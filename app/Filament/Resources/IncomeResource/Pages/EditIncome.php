@@ -23,17 +23,16 @@ class EditIncome extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-
-        if ($data['is_recurring'])
-        {
+        if (! empty($data['is_recurring'])) {
             $recurrence = Income::with('recurrence')
-                ->where('id', $data['id'])
-                ->first()
-                ->recurrence
-                ->toArray();
-            $data['frequency'] = $recurrence['frequency'];
-            $data['starts_at'] = $recurrence['starts_at'];
-            $data['ends_at'] = $recurrence['ends_at'];
+                ->find($data['id'])
+                ?->recurrence;
+
+            if ($recurrence) {
+                $data['frequency'] = $recurrence->frequency;
+                $data['starts_at'] = $recurrence->starts_at;
+                $data['ends_at'] = $recurrence->ends_at;
+            }
         }
 
         return $data;

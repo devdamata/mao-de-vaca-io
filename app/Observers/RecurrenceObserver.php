@@ -15,43 +15,7 @@ class RecurrenceObserver
      */
     public function created(Recurrence $recurrence): void
     {
-        $start = Carbon::parse($recurrence->starts_at);
-        $end = Carbon::parse($recurrence->ends_at);
-        $current = $start->copy();
-
-        $returnAmount = Income::where('id', $recurrence->income_id)->first();
-        if ($returnAmount === null) {
-            $returnAmount = Expense::where('id', $recurrence->expense_id)->first();
-        }
-
-        $isIncome = $recurrence->income_id != null ? true : false;
-
-        while ($current <= $end) {
-            Parcel::create([
-                'recurrence_id' => $recurrence->id,
-                'due_date' => $current->copy(),
-                'amount' => $returnAmount->amount,
-                'is_income' => $isIncome
-            ]);
-
-            switch ($recurrence->frequency) {
-                case 'monthly':
-                    $current->addMonth();
-                    break;
-                case 'weekly':
-                    $current->addWeek();
-                    break;
-                case 'daily':
-                    $current->addDay();
-                    break;
-                case 'yearly':
-                    $current->addYear();
-                    break;
-                default:
-                    $current = $end->copy()->addDay();
-                    break;
-            }
-        }
+        $this->generateParcels($recurrence);
     }
 
     /**
@@ -59,70 +23,51 @@ class RecurrenceObserver
      */
     public function updated(Recurrence $recurrence): void
     {
-        $existisParcels = Parcel::where('recurrence_id', $recurrence->income_id)->first();
+        // Regenera as parcelas apenas quando a frequência ou as datas mudam
+        if ($recurrence->wasChanged(['frequency', 'starts_at', 'ends_at', 'income_id', 'expense_id'])) {
+            $recurrence->parcel()->delete();
+            $this->generateParcels($recurrence);
+        }
+    }
 
-        if ($existisParcels === null) {
-            $start = Carbon::parse($recurrence->starts_at);
-            $end = Carbon::parse($recurrence->ends_at);
-            $current = $start->copy();
-
-            $returnAmount = Income::where('id', $recurrence->income_id)->first();
-            if ($returnAmount === null) {
-                $returnAmount = Expense::where('id', $recurrence->expense_id)->first();
-            }
-
-            $isIncome = $recurrence->income_id != null ? true : false;
-            while ($current <= $end) {
-                Parcel::create([
-                    'recurrence_id' => $recurrence->id,
-                    'due_date' => $current->copy(),
-                    'amount' => $returnAmount->amount,
-                    'is_income' => $isIncome
-                ]);
-
-                switch ($recurrence->frequency) {
-                    case 'monthly':
-                        $current->addMonth();
-                        break;
-                    case 'weekly':
-                        $current->addWeek();
-                        break;
-                    case 'daily':
-                        $current->addDay();
-                        break;
-                    case 'yearly':
-                        $current->addYear();
-                        break;
-                    default:
-                        $current = $end->copy()->addDay();
-                        break;
-                }
-            }
+    /**
+     * Gera as parcelas de uma recorrência entre starts_at e ends_at.
+     */
+    private function generateParcels(Recurrence $recurrence): void
+    {
+        if (! $recurrence->starts_at || ! $recurrence->ends_at) {
+            return;
         }
 
-    }
+        $source = $recurrence->income_id
+            ? Income::find($recurrence->income_id)
+            : Expense::find($recurrence->expense_id);
 
-    /**
-     * Handle the Recurrence "deleted" event.
-     */
-    public function deleted(Recurrence $recurrence): void
-    {
-        //
-    }
+        if (! $source) {
+            return;
+        }
 
-    /**
-     * Handle the Recurrence "restored" event.
-     */
-    public function restored(Recurrence $recurrence): void
-    {
-        //
-    }
+        $isIncome = $recurrence->income_id !== null;
 
-    /**
-     * Handle the Recurrence "force deleted" event.
-     */
-    public function forceDeleted(Recurrence $recurrence): void
-    {
-        //
+        $current = Carbon::parse($recurrence->starts_at);
+        $end = Carbon::parse($recurrence->ends_at);
+
+        while ($current <= $end) {
+            Parcel::create([
+                'recurrence_id' => $recurrence->id,
+                'due_date' => $current->copy(),
+                'amount' => $source->amount,
+                'is_income' => $isIncome,
+            ]);
+
+            match ($recurrence->frequency) {
+                'monthly' => $current->addMonth(),
+                'weekly'  => $current->addWeek(),
+                'daily'   => $current->addDay(),
+                'yearly'  => $current->addYear(),
+                // 'once' (ou desconhecido): encerra após uma única parcela
+                default   => $current = $end->copy()->addDay(),
+            };
+        }
     }
 }

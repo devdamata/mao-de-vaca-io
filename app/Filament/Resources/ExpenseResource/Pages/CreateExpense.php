@@ -10,6 +10,8 @@ class CreateExpense extends CreateRecord
 {
     protected static string $resource = ExpenseResource::class;
 
+    public ?array $recurrencyData = null;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if ($data['is_recurring']) {

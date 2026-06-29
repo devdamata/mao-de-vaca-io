@@ -12,11 +12,13 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Actions\ViewAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\ExpenseResource\Pages\ListExpenses;
 use App\Filament\Resources\ExpenseResource\Pages\CreateExpense;
+use App\Filament\Resources\ExpenseResource\Pages\ViewExpense;
 use App\Filament\Resources\ExpenseResource\Pages\EditExpense;
 use App\Filament\Resources\ExpenseResource\Pages;
 use App\Filament\Resources\ExpenseResource\RelationManagers;
@@ -45,6 +47,12 @@ class ExpenseResource extends Resource
         return 'Despesas';
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->where('user_id', Filament::auth()->id());
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -59,7 +67,10 @@ class ExpenseResource extends Resource
                 Select::make('expense_category_id')
                     ->label('Categoria')
                     ->placeholder('Selecione categoria')
-                    ->relationship('category', 'name')
+                    ->relationship('category', 'name', fn (Builder $query) => $query
+                        ->where(fn (Builder $q) => $q
+                            ->whereNull('user_id')
+                            ->orWhere('user_id', Filament::auth()->id())))
                     ->required(),
                 TextInput::make('description')
                     ->label('Descrição')
@@ -137,6 +148,7 @@ class ExpenseResource extends Resource
                 //
             ])
             ->recordActions([
+                ViewAction::make(),
                 EditAction::make(),
             ])
             ->toolbarActions([
@@ -158,6 +170,7 @@ class ExpenseResource extends Resource
         return [
             'index' => ListExpenses::route('/'),
             'create' => CreateExpense::route('/create'),
+            'view' => ViewExpense::route('/{record}'),
             'edit' => EditExpense::route('/{record}/edit'),
         ];
     }

@@ -12,6 +12,8 @@ class CreateIncome extends CreateRecord
 
     protected static ?string $title = 'Adicionar Receita';
 
+    public ?array $recurrencyData = null;
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if ($data['is_recurring']) {

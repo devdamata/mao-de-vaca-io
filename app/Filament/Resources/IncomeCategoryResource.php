@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\ViewAction;
@@ -15,10 +16,13 @@ use App\Filament\Resources\IncomeCategoryResource\Pages\ViewIncomeCategory;
 use App\Filament\Resources\IncomeCategoryResource\Pages\EditIncomeCategory;
 use App\Filament\Resources\IncomeCategoryResource\Pages;
 use App\Models\IncomeCategory;
+use Filament\Facades\Filament;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class IncomeCategoryResource extends Resource
 {
@@ -30,10 +34,33 @@ class IncomeCategoryResource extends Resource
         return 'Receitas';
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        $userId = Filament::auth()->id();
+
+        // Categorias globais (user_id nulo) + categorias do próprio usuário
+        return parent::getEloquentQuery()
+            ->where(fn (Builder $query) => $query
+                ->whereNull('user_id')
+                ->orWhere('user_id', $userId));
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return $record->user_id === Filament::auth()->id();
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return $record->user_id === Filament::auth()->id();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
+                Hidden::make('user_id')
+                    ->default(fn () => Filament::auth()->id()),
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)
@@ -79,15 +106,4 @@ class IncomeCategoryResource extends Resource
             'edit' => EditIncomeCategory::route('/{record}/edit'),
         ];
     }
-
-    public static function getNavigation(): array
-    {
-        return [
-            'label' => 'Categorias de Receitas',
-            'group' => 'Receitas',
-            'sort' => 2, // Este menu aparecerá primeiro
-            'icon' => 'heroicon-o-tag',
-        ];
-    }
-
 }

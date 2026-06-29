@@ -41,12 +41,13 @@ class Recurrence extends Model
 
     public function getTranslateEnumFrequency()
     {
-        return match ($this->status) {
+        return match ($this->frequency) {
             'once'      => 'Uma vez',
             'daily'     => 'Diariamente',
             'weekly'    => 'Semanalmente',
             'monthly'   => 'Mensalmente',
-            'yearly'    => 'Anualmente'
+            'yearly'    => 'Anualmente',
+            default     => '-',
         };
     }
 
@@ -62,6 +63,6 @@ class Recurrence extends Model
 
     public function expenses(): BelongsTo
     {
-        return $this->belongsTo(Expense::class, 'id');
+        return $this->belongsTo(Expense::class, 'expense_id');
     }
 }
